@@ -1,63 +1,127 @@
-[![Open in Visual Studio Code](https://classroom.github.com/assets/open-in-vscode-2e0aaae1b6195c2367325f4f02e2d04e9abb55f0b24a779b69b11b9e10269abc.svg)](https://classroom.github.com/online_ide?assignment_repo_id=20150753&assignment_repo_type=AssignmentRepo)
-# Express.js RESTful API Assignment
+# Express Products API
 
-This assignment focuses on building a RESTful API using Express.js, implementing proper routing, middleware, and error handling.
+A RESTful API built with Express.js that demonstrates CRUD operations, routing, middleware, validation, and error handling.
 
-## Assignment Overview
+## ✅ Features
+- CRUD for a `products` resource with fields: `id`, `name`, `description`, `price`, `category`, `inStock`
+- Middleware:
+  - Custom logger (method, URL, timestamp)
+  - JSON body parsing (`body-parser`)
+  - API key auth via `x-api-key` header (bypassed if no `API_KEY` set)
+  - Request validation for create/update
+- Error handling:
+  - Custom error classes and global handler
+  - 404 for unknown routes and missing products
+- Advanced:
+  - Filter by `category`
+  - Pagination with `page` and `limit`
+  - Search by name `/api/products/search?q=`
+  - Stats endpoint with counts by category
 
-You will:
-1. Set up an Express.js server
-2. Create RESTful API routes for a product resource
-3. Implement custom middleware for logging, authentication, and validation
-4. Add comprehensive error handling
-5. Develop advanced features like filtering, pagination, and search
+## 🛠 Setup
+- Requires **Node.js v18+**
+- Install dependencies:
+  ```bash
+  npm install
+  ```
+- Create a `.env` file (or copy `.env.example`) and set an API key if you want auth enforced:
+  ```env
+  API_KEY=your_api_key
+  PORT=3000
+  ```
 
-## Getting Started
+## 🚀 Run
+```bash
+npm start
+# or
+npm run dev
+```
 
-1. Accept the GitHub Classroom assignment invitation
-2. Clone your personal repository that was created by GitHub Classroom
-3. Install dependencies:
-   ```
-   npm install
-   ```
-4. Run the server:
-   ```
-   npm start
-   ```
+Server listens on `http://localhost:3000`.
+Root route returns **Hello World**.
 
-## Files Included
+## 📚 API Endpoints
 
-- `Week2-Assignment.md`: Detailed assignment instructions
-- `server.js`: Starter Express.js server file
-- `.env.example`: Example environment variables file
+### Health
+- `GET /` – Hello World
 
-## Requirements
+### Products
+- `GET /api/products` – List products (supports `?category=electronics&page=1&limit=10`)
+  - **Response**
+    ```json
+    {
+      "items": [ /* products */ ],
+      "total": 3,
+      "page": 1,
+      "totalPages": 1,
+      "limit": 10
+    }
+    ```
+- `GET /api/products/:id` – Get by ID
+- `POST /api/products` – Create product *(Requires `x-api-key` when `API_KEY` is set)*
+- `PUT /api/products/:id` – Update product *(Requires `x-api-key` when `API_KEY` is set)*
+- `DELETE /api/products/:id` – Delete product *(Requires `x-api-key` when `API_KEY` is set)*
 
-- Node.js (v18 or higher)
-- npm or yarn
-- Postman, Insomnia, or curl for API testing
+### Search
+- `GET /api/products/search?q=phone` – Search by name (also supports `category`, `page`, `limit`)
 
-## API Endpoints
+### Stats
+- `GET /api/products/stats` – Returns product counts:
+  ```json
+  {
+    "total": 3,
+    "byCategory": {
+      "electronics": 1,
+      "sports": 1,
+      "furniture": 1
+    }
+  }
+  ```
 
-The API will have the following endpoints:
+## 🔐 Authentication
+If `API_KEY` is set in the environment, write operations require the header:
+```
+x-api-key: your_api_key
+```
 
-- `GET /api/products`: Get all products
-- `GET /api/products/:id`: Get a specific product
-- `POST /api/products`: Create a new product
-- `PUT /api/products/:id`: Update a product
-- `DELETE /api/products/:id`: Delete a product
+If `API_KEY` is **not** set, the auth middleware is bypassed—useful for local dev and autograding.
 
-## Submission
+## 🧪 Sample Requests (curl)
 
-Your work will be automatically submitted when you push to your GitHub Classroom repository. Make sure to:
+```bash
+# List products (first page, 2 per page)
+curl "http://localhost:3000/api/products?page=1&limit=2"
 
-1. Complete all the required API endpoints
-2. Implement the middleware and error handling
-3. Document your API in the README.md
-4. Include examples of requests and responses
+# Filter by category
+curl "http://localhost:3000/api/products?category=electronics"
 
-## Resources
+# Search
+curl "http://localhost:3000/api/products/search?q=phone"
 
-- [Express.js Documentation](https://expressjs.com/)
-- [RESTful API Design Best Practices](https://restfulapi.net/)
-- [HTTP Status Codes](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status) 
+# Create (requires x-api-key if API_KEY configured)
+curl -X POST http://localhost:3000/api/products   -H "Content-Type: application/json"   -H "x-api-key: your_api_key"   -d '{"name":"Laptop","description":"15-inch","price":999.99,"category":"electronics","inStock":true}'
+```
+
+## 🧩 Project Structure
+```
+express-products-api/
+├─ server.js
+├─ package.json
+├─ .env.example
+├─ README.md
+└─ src/
+   ├─ routes/
+   │  └─ products.js
+   ├─ controllers/
+   │  └─ productsController.js
+   ├─ middleware/
+   │  ├─ logger.js
+   │  ├─ auth.js
+   │  ├─ validators.js
+   │  ├─ asyncHandler.js
+   │  └─ errorHandler.js
+   ├─ data/
+   │  └─ store.js
+   └─ utils/
+      └─ errors.js
+```
